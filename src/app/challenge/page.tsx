@@ -12,6 +12,7 @@ import { useCallback, useEffect, useState } from "react";
 import { API_URL, API_USER_ID } from "@/constants";
 import { useAuthCheck } from "@/utils";
 import { useRouter } from "next/navigation";
+import { IFriendChallenge } from "@/types";
 
 export default function Challenge() {
   const [challenge, setChallenge] = useState<{
@@ -19,16 +20,19 @@ export default function Challenge() {
     book_want: number;
     challenge_id: number;
   } | null>(null);
+  const [firendsChallengeData, setFriendsChallengeData] = useState<
+    IFriendChallenge[] | null
+  >(null);
   const [isChallengeFormVisible, setIsChallengeFormVisible] =
     useState<boolean>(false);
 
-    const [currentUserId, setCurrentUserId] = useState<string | 1>(API_USER_ID);
-    useEffect(() => {
-      if (typeof window !== "undefined") {
-        const item = window ? window.localStorage.getItem("user_id") : null;
-        setCurrentUserId(item ? item : API_USER_ID);
-      }
-    }, []);
+  const [currentUserId, setCurrentUserId] = useState<string | 1>(API_USER_ID);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const item = window ? window.localStorage.getItem("user_id") : null;
+      setCurrentUserId(item ? item : API_USER_ID);
+    }
+  }, []);
 
   const router = useRouter();
 
@@ -59,9 +63,38 @@ export default function Challenge() {
     }
   }, [currentUserId]);
 
+  const loadFriendsChallenge = useCallback(async () => {
+    const firendsChallengeResponse = await fetch(
+      `${API_URL}/book_challenge/friends`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: currentUserId,
+        }),
+      }
+    );
+
+    const friendChallengeData: {
+      friend_challenges: IFriendChallenge[];
+      success: boolean;
+    } = await firendsChallengeResponse.json();
+
+    console.log("challengeData", friendChallengeData.success);
+
+    if (friendChallengeData.success) {
+      setFriendsChallengeData(friendChallengeData.friend_challenges);
+      console.log(friendChallengeData);
+    }
+  }, [currentUserId]);
+
   useEffect(() => {
     loadUserChallenge();
-  }, [loadUserChallenge]);
+    loadFriendsChallenge();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <PageWrapper backgroundSrc={background.src} className={style.page}>
@@ -82,20 +115,6 @@ export default function Challenge() {
             <p className={classNames(style.consistency, Poppins.className)}>
               Good job! Consistency is the key!
             </p>
-            {challenge &&
-              (challenge.book_read > challenge.book_want ||
-                challenge.book_want === 0 ||
-                isChallengeFormVisible) && (
-                <ChallengeForm
-                  onSuccess={(want) => {
-                    setChallenge({
-                      ...challenge,
-                      book_want: want,
-                    });
-                    setIsChallengeFormVisible(false);
-                  }}
-                />
-              )}
 
             <div className={style.infoWrapper}>
               {" "}
@@ -126,6 +145,32 @@ export default function Challenge() {
               Change
             </button>
           </div>
+        </div>
+
+        {challenge &&
+          (challenge.book_read > challenge.book_want ||
+            challenge.book_want === 0 ||
+            isChallengeFormVisible) && (
+            <ChallengeForm
+              onSuccess={(want) => {
+                setChallenge({
+                  ...challenge,
+                  book_want: want,
+                });
+                setIsChallengeFormVisible(false);
+              }}
+            />
+          )}
+
+        <div className={style.friendChallenge}>
+          {firendsChallengeData &&
+            firendsChallengeData.map((friend_challenge) => (
+              <div key={friend_challenge.friend_id}>
+                <p>{friend_challenge.friend_name}</p>
+                <p>Read: {friend_challenge.book_read}</p>
+                <p>Want: {friend_challenge.book_want}</p>
+              </div>
+            ))}
         </div>
       </div>
     </PageWrapper>

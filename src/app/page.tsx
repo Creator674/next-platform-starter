@@ -13,14 +13,17 @@ import style from "./page.module.css";
 
 import background from "../../public/page-background-main.png";
 import { API_URL, API_USER_ID, reviews } from "@/constants";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { IBook, ICollection } from "@/types";
 import { useAuthCheck } from "@/utils";
 import { useRouter } from "next/navigation";
+import { ISearchData } from "@/types/SearchData";
+import { FriendCard } from "@/components/FriendCard";
 
 export default function Home() {
   const [books, setBooks] = useState<IBook[]>([]);
   const [collections, setCollections] = useState<ICollection[]>([]);
+  const [searchData, setSearchData] = useState<ISearchData>();
 
   const [currentUserId, setCurrentUserId] = useState<string | 1>(API_USER_ID);
   useEffect(() => {
@@ -70,17 +73,6 @@ export default function Home() {
     setBooks(booksData);
 
     await loadCollections();
-
-    // const imagesResponse = await fetch(`${API_URL}/images`, {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    // });
-
-    // const imagesData = await imagesResponse.json();
-
-    // console.log("images", imagesData);
   }, [currentUserId, loadCollections]);
 
   useEffect(() => {
@@ -88,23 +80,85 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const isSearch: boolean = useMemo(() => {
+    if (searchData && searchData.books.length > 0) {
+      return true;
+    }
+
+    if (searchData && searchData.users.length > 0) {
+      return true;
+    }
+
+    if (searchData && searchData.book_by_author.length > 0) {
+      return true;
+    }
+    return false;
+  }, [searchData]);
+
+  const [fdata, setFdata] = useState<{ [id: string]: boolean }>(() => {
+    if (!searchData) {
+      return {};
+    }
+
+    const res: { [id: string]: boolean } = {};
+
+    searchData.users.forEach((item) => {
+      res[item.id] = item.is_friend;
+    });
+
+    return res;
+  });
+
   return (
     <PageWrapper backgroundSrc={background.src} className={style.page}>
       <Menu />
 
       <div className={style.pageContent}>
-        <Search />
+        <Search handleDateChange={(data) => setSearchData(data)} />
 
         <div className={style.mainContent}>
-          {collections.map((collection) => (
-            <CollectionCard key={collection.id} {...collection} />
-          ))}
+          {!isSearch &&
+            collections.map((collection) => (
+              <CollectionCard key={collection.id} {...collection} />
+            ))}
 
-          <ReviewCard {...reviews[0]} />
+          {!isSearch && <ReviewCard {...reviews[0]} />}
 
-          {books.map((item) => (
-            <BookCard key={item.book_id} {...item} />
-          ))}
+          {!isSearch &&
+            books.map((item) => <BookCard key={item.book_id} {...item} />)}
+
+          {isSearch &&
+            searchData &&
+            searchData.books.map((bb) => <BookCard key={bb.book_id} {...bb} />)}
+
+          {isSearch &&
+            searchData &&
+            searchData.users.map((us) => {
+              return (
+                <FriendCard
+                  key={us.id}
+                  onSuccess={(id, status) => {
+                    const copy = { ...fdata };
+                    if (status === "add") {
+                      copy[id] = true;
+                      console.log("a", fdata);
+                    } else if (status === "remove") {
+                      copy[id] = false;
+                      console.log("r", fdata);
+                    }
+                    setFdata(copy);
+                  }}
+                  isFriend={fdata[us.id]}
+                  {...us}
+                />
+              );
+            })}
+
+          {isSearch &&
+            searchData &&
+            searchData.book_by_author.map((bb) => (
+              <BookCard key={bb.book_id} {...bb} />
+            ))}
         </div>
       </div>
     </PageWrapper>

@@ -13,7 +13,7 @@ export interface FriendCardProps extends IUser {
   isFriend?: boolean;
   isMe?: boolean;
   isImmutable?: boolean;
-  onSuccess: (id: number) => void;
+  onSuccess: (id: number, status?: "remove" | "add") => void;
 }
 
 export const FriendCard: FC<FriendCardProps> = ({
@@ -52,7 +52,7 @@ export const FriendCard: FC<FriendCardProps> = ({
       const friendsData: { success: boolean } = await addFriendRes.json();
 
       if (friendsData.success) {
-        onSuccess(friend_id);
+        onSuccess(friend_id, 'add');
       }
 
       console.log("Add Friend? ", friendsData.success);
@@ -76,7 +76,7 @@ export const FriendCard: FC<FriendCardProps> = ({
       const friendsData: { success: boolean } = await removeFriendRes.json();
 
       if (friendsData.success) {
-        onSuccess(friend_id);
+        onSuccess(friend_id, "remove");
       }
 
       console.log("remove Friend? ", friendsData.success);

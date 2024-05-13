@@ -10,14 +10,23 @@ import { Poppins } from "@/fonts";
 import { API_URL, API_USER_ID } from "@/constants";
 import { ICollection } from "@/types";
 import { useState, useCallback, useEffect } from "react";
-import { useAuthCheck } from "../login/page";
+import { useAuthCheck } from "@/utils";
+import { useRouter } from "next/navigation";
 
 export default function Collections() {
   const [collections, setCollections] = useState<ICollection[]>([]);
-  useAuthCheck();
+  const router = useRouter();
+  useAuthCheck(router);
 
-  const item = localStorage.getItem("user_id");
-  const currentUserId: string | 1 = item ? item : API_USER_ID;
+  const [currentUserId, setCurrentUserId] = useState<string | number>(
+    API_USER_ID
+  );
+
+  if (typeof window !== "undefined") {
+    const item = window.localStorage.getItem("user_id");
+    const currentUserId: string | 1 = item ? item : API_USER_ID;
+    setCurrentUserId(currentUserId);
+  }
 
   const loadCollectionsData = useCallback(async () => {
     //change USER id to user RN
@@ -41,8 +50,8 @@ export default function Collections() {
 
   useEffect(() => {
     loadCollectionsData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <PageWrapper backgroundSrc={background.src} className={style.page}>

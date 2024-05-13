@@ -1,7 +1,7 @@
 "use client";
 
 import { PageWrapper } from "@/components";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 
 import style from "./page.module.css";
 
@@ -11,7 +11,6 @@ import { Poppins } from "@/fonts";
 import { useRouter } from "next/navigation";
 import { API_URL, Pages } from "@/constants";
 import { Resolver, SubmitHandler, useForm } from "react-hook-form";
-import { toast } from "react-toastify";
 
 type LoginValues = {
   login: string;
@@ -32,24 +31,15 @@ const resolver: Resolver<LoginValues> = async (values) => {
   };
 };
 
-export const useAuthCheck = () => {
-  const router = useRouter();
-
-  useEffect(() => {
-    const item = localStorage.getItem("user_id");
-
-    if (item === null) {
-      toast.error("Not Authorized!");
-      router.replace(Pages.login);
-    }
-  }, [router]);
-};
-
 export default function Login() {
   const router = useRouter();
 
   useEffect(() => {
-    const item = localStorage.getItem("user_id");
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const item = window.localStorage.getItem("user_id");
 
     if (item !== null) {
       router.replace(Pages.main);
@@ -83,8 +73,12 @@ export default function Login() {
 
       console.log("login data", data);
 
-      if (data.success && data.userId !== undefined) {
-        localStorage.setItem("user_id", `${data.userId}`);
+      if (
+        data.success &&
+        data.userId !== undefined &&
+        typeof window !== "undefined"
+      ) {
+        window.localStorage.setItem("user_id", `${data.userId}`);
         router.push(Pages.main);
       }
     },

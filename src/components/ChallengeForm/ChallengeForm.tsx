@@ -32,14 +32,21 @@ const customRes: Resolver<ChallengeFormValues> = async (values) => {
   return result;
 };
 
-const ChallengeForm: React.FC<ChallengeFormProps> = ({ onSuccess }) => {
+export const ChallengeForm: React.FC<ChallengeFormProps> = ({ onSuccess }) => {
   const { handleSubmit, register, formState } = useForm<ChallengeFormValues>({
     resolver: customRes,
   });
   const [amount, setAmount] = useState("");
 
-  const item = localStorage.getItem("user_id");
-  const currentUserId: string | 1 = item ? item : API_USER_ID;
+  const [currentUserId, setCurrentUserId] = useState<string | number>(
+    API_USER_ID
+  );
+
+  if (typeof window !== "undefined") {
+    const item = window.localStorage.getItem("user_id");
+    const currentUserId: string | 1 = item ? item : API_USER_ID;
+    setCurrentUserId(currentUserId);
+  }
 
   const handleFormSubmit: SubmitHandler<ChallengeFormValues> = useCallback(
     async (state) => {

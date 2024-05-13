@@ -78,8 +78,12 @@ export default function Login() {
 
       console.log("me data", data);
 
-      if (data.success && data.userId !== undefined) {
-        localStorage.setItem("user_id", `${data.userId}`);
+      if (
+        data.success &&
+        data.userId !== undefined &&
+        typeof window !== "undefined"
+      ) {
+        window.localStorage.setItem("user_id", `${data.userId}`);
         router.push(Pages.main);
       }
     },

@@ -16,13 +16,12 @@ import background from "../../../../public/page-background-main.png";
 import classNames from "classnames";
 import { Poppins } from "@/fonts";
 import { useCallback, useEffect, useState } from "react";
-import { API_URL, API_USER_ID } from "@/constants";
+import { API_URL, API_USER_ID, enabledFilters, filtersType } from "@/constants";
 import { IUser, IBook, ICollection, IReview } from "@/types";
-import { useParams } from "next/navigation";
-import { filtersType, enabledFilters } from "@/app/me/page";
+import { useParams, useRouter } from "next/navigation";
 import { ProfileSection } from "@/components/ProfileSection";
 import { FriendCard } from "@/components/FriendCard";
-import { useAuthCheck } from "@/app/login/page";
+import { useAuthCheck } from "@/utils";
 import { getMonthName } from "@/utils";
 
 export default function CollectionPage() {
@@ -36,10 +35,18 @@ export default function CollectionPage() {
   const [books, setBooks] = useState<IBook[]>([]);
   const params = useParams<{ id: string }>();
 
-  useAuthCheck();
+  const router = useRouter();
+  useAuthCheck(router);
 
-  const item = localStorage.getItem("user_id");
-  const currentUserId: string | 1 = item ? item : API_USER_ID;
+  const [currentUserId, setCurrentUserId] = useState<string | number>(
+    API_USER_ID
+  );
+
+  if (typeof window !== "undefined") {
+    const item = window.localStorage.getItem("user_id");
+    const currentUserId: string | 1 = item ? item : API_USER_ID;
+    setCurrentUserId(currentUserId);
+  }
 
   const loadUserData = useCallback(async () => {
     const userResponse = await fetch(`${API_URL}/user`, {

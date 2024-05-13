@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { generateRandomColor } from "@/utils";
 import Image from "next/image";
 import { API_URL, API_USER_ID, BASE_API_URL } from "@/constants";
-import { useAuthCheck } from "@/app/login/page";
+import { useAuthCheck } from "@/utils";
 
 export type BookStatus = "read" | "reading" | "complete";
 export type BookStatusDB = "Прочитано" | "Буду читать" | "Читаю сейчас";
@@ -63,10 +63,17 @@ export const BookCard: FC<BookCardProps> = ({
     return generateRandomColor();
   }, []);
 
-  useAuthCheck();
+  useAuthCheck(router);
 
-  const item = localStorage.getItem("user_id");
-  const currentUserId: string | 1 = item ? item : API_USER_ID;
+  const [currentUserId, setCurrentUserId] = useState<string | number>(
+    API_USER_ID
+  );
+
+  if (typeof window !== "undefined") {
+    const item = window.localStorage.getItem("user_id");
+    const currentUserId: string | 1 = item ? item : API_USER_ID;
+    setCurrentUserId(currentUserId);
+  }
 
   const changeStatus = useCallback(
     async (book_id: number, status: BookStatus) => {

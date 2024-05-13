@@ -15,16 +15,26 @@ import background from "../../public/page-background-main.png";
 import { API_URL, API_USER_ID, reviews } from "@/constants";
 import { useCallback, useEffect, useState } from "react";
 import { IBook, ICollection } from "@/types";
-import { useAuthCheck } from "./login/page";
+import { useAuthCheck } from "@/utils";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [books, setBooks] = useState<IBook[]>([]);
   const [collections, setCollections] = useState<ICollection[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | number>(
+    API_USER_ID
+  );
 
-  useAuthCheck();
+  if (typeof window !== "undefined") {
+    const item = window.localStorage.getItem("user_id");
+    const currentUserId: string | 1 = item ? item : API_USER_ID;
+    setCurrentUserId(currentUserId);
+  }
+  const router = useRouter();
 
-  const item = localStorage.getItem("user_id");
-  const currentUserId: string | 1 = item ? item : API_USER_ID;
+  useAuthCheck(router);
+
+  
 
   const loadCollections = useCallback(async () => {
     const collectionsResponse = await fetch(`${API_URL}/all_user_collections`, {

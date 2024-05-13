@@ -55,7 +55,9 @@ const buttonMenuItems: IMenuItem[] = [
     link: "/login",
     imageSrc: quitIcon.src,
     sideAction: () => {
-      localStorage.removeItem("user_id");
+      if (typeof window !== "undefined") {
+        window.localStorage.removeItem("user_id");
+      }
     },
   },
 ];

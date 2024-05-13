@@ -29,8 +29,15 @@ export const FriendCard: FC<FriendCardProps> = ({
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const item = localStorage.getItem("user_id");
-  const currentUserId: string | 1 = item ? item : API_USER_ID;
+  const [currentUserId, setCurrentUserId] = useState<string | number>(
+    API_USER_ID
+  );
+
+  if (typeof window !== "undefined") {
+    const item = window.localStorage.getItem("user_id");
+    const currentUserId: string | 1 = item ? item : API_USER_ID;
+    setCurrentUserId(currentUserId);
+  }
 
   const addFriendReq = useCallback(
     async (friend_id: number) => {

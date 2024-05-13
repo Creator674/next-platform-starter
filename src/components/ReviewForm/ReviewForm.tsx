@@ -53,8 +53,15 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onSuccess }) => {
   const [rate, setRate] = useState<Rating>(1);
   const [text, setText] = useState("");
 
-  const item = localStorage.getItem("user_id");
-  const currentUserId: string | 1 = item ? item : API_USER_ID;
+  const [currentUserId, setCurrentUserId] = useState<string | number>(
+    API_USER_ID
+  );
+
+  if (typeof window !== "undefined") {
+    const item = window.localStorage.getItem("user_id");
+    const currentUserId: string | 1 = item ? item : API_USER_ID;
+    setCurrentUserId(currentUserId);
+  }
 
   const handleFormSubmit: SubmitHandler<ReviewFormValues> = useCallback(
     async ({ review, reviewTitle }) => {

@@ -17,28 +17,12 @@ import background from "../../../public/page-background-main.png";
 import { ProfileSection } from "@/components/ProfileSection";
 import classNames from "classnames";
 import { Poppins } from "@/fonts";
-import { API_URL, API_USER_ID } from "@/constants";
+import { API_URL, API_USER_ID, enabledFilters, filtersType } from "@/constants";
 import { IBook, ICollection, IReview, IUser } from "@/types";
 import { FriendCard } from "@/components/FriendCard";
-import { useAuthCheck } from "../login/page";
+import { useAuthCheck } from "@/utils";
 import { getMonthName } from "@/utils";
-
-export type filtersType =
-  | "read"
-  | "reading"
-  | "completed"
-  | "collections"
-  | "reviews"
-  | "friends";
-
-export const enabledFilters: filtersType[] = [
-  "read",
-  "reading",
-  "completed",
-  "collections",
-  "reviews",
-  "friends",
-];
+import { useRouter } from "next/navigation";
 
 interface Me {
   id: number;
@@ -61,10 +45,19 @@ export default function Me() {
     avatarUrl: "",
   });
 
-  useAuthCheck();
+  const router = useRouter();
 
-  const item = localStorage.getItem("user_id");
-  const currentUserId: string | 1 = item ? item : API_USER_ID;
+  useAuthCheck(router);
+
+  const [currentUserId, setCurrentUserId] = useState<string | number>(
+    API_USER_ID
+  );
+
+  if (typeof window !== "undefined") {
+    const item = window.localStorage.getItem("user_id");
+    const currentUserId: string | 1 = item ? item : API_USER_ID;
+    setCurrentUserId(currentUserId);
+  }
 
   const loadMe = useCallback(async () => {
     const meResponse = await fetch(`${API_URL}/user`, {

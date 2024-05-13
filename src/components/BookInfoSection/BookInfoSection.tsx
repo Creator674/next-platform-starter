@@ -1,11 +1,12 @@
 "use client";
 
-import { FC } from "react";
+import { FC, useState } from "react";
 import style from "./BookInfoSection.module.css";
 import { IBook } from "@/types";
 import classNames from "classnames";
 import { Poppins } from "@/fonts";
 import { BookRate } from "../BookRate";
+import { Rating } from "../ReviewForm";
 
 export interface BookInfoSectionProps extends IBook {}
 
@@ -15,6 +16,8 @@ export const BookInfoSection: FC<BookInfoSectionProps> = ({
   rate,
   annotation,
 }) => {
+  const [currentRate, setCurrentRate] = useState<Rating | number>(rate);
+
   return (
     <div className={style.section}>
       <div className={style.content}>
@@ -27,9 +30,13 @@ export const BookInfoSection: FC<BookInfoSectionProps> = ({
         </div>
 
         <div className={style.rate}>
-          <p className={classNames(style.rating, Poppins.className)}>{rate}</p>
+          <p className={classNames(style.rating, Poppins.className)}>{currentRate}</p>
 
-          <BookRate />
+          <BookRate
+            onRateChange={(newRate) => {
+              setCurrentRate(newRate);
+            }}
+          />
         </div>
       </div>
 

@@ -11,16 +11,26 @@ import { API_URL, API_USER_ID } from "@/constants";
 import { IUser } from "@/types";
 import { useCallback, useEffect, useState } from "react";
 import { FriendCard } from "@/components/FriendCard";
-import { useAuthCheck } from "../login/page";
+import { useAuthCheck } from "@/utils";
+import { useRouter } from "next/navigation";
 
 export default function Friends() {
   const [friends, setFriends] = useState<IUser[]>([]);
   const [nonFriends, setNonFriends] = useState<IUser[]>([]);
 
-  useAuthCheck();
+  const router = useRouter();
 
-  const item = localStorage.getItem("user_id");
-  const currentUserId: string | 1 = item ? item : API_USER_ID;
+  useAuthCheck(router);
+
+  const [currentUserId, setCurrentUserId] = useState<string | number>(
+    API_USER_ID
+  );
+
+  if (typeof window !== "undefined") {
+    const item = window.localStorage.getItem("user_id");
+    const currentUserId: string | 1 = item ? item : API_USER_ID;
+    setCurrentUserId(currentUserId);
+  }
 
   const loadFriends = useCallback(async () => {
     const friendsResponse = await fetch(`${API_URL}/friends`, {

@@ -10,7 +10,8 @@ import { Poppins } from "@/fonts";
 import ChallengeForm from "@/components/ChallengeForm/ChallengeForm";
 import { useCallback, useEffect, useState } from "react";
 import { API_URL, API_USER_ID } from "@/constants";
-import { useAuthCheck } from "../login/page";
+import { useAuthCheck } from "@/utils";
+import { useRouter } from "next/navigation";
 
 export default function Challenge() {
   const [challenge, setChallenge] = useState<{
@@ -20,11 +21,19 @@ export default function Challenge() {
   } | null>(null);
   const [isChallengeFormVisible, setIsChallengeFormVisible] =
     useState<boolean>(false);
+  const [currentUserId, setCurrentUserId] = useState<string | number>(
+    API_USER_ID
+  );
 
-  useAuthCheck();
+  const router = useRouter();
 
-  const item = localStorage.getItem("user_id");
-  const currentUserId: string | 1 = item ? item : API_USER_ID;
+  useAuthCheck(router);
+
+  if (typeof window !== "undefined") {
+    const item = window.localStorage.getItem("user_id");
+    const currentUserId: string | 1 = item ? item : API_USER_ID;
+    setCurrentUserId(currentUserId);
+  }
 
   const loadUserChallenge = useCallback(async () => {
     const challengeResponse = await fetch(`${API_URL}/book_challenge`, {
@@ -89,25 +98,25 @@ export default function Challenge() {
                 />
               )}
 
-           <div className={style.infoWrapper}> <div className={style.infoContainer}>
-              
-              <p className={classNames(style.bookInfo, Poppins.className)}>
-                Already read
-              </p>
-              <p className={classNames(style.bookInfo, Poppins.className)}>
-                
-                {challenge?.book_read}
-              </p>
+            <div className={style.infoWrapper}>
+              {" "}
+              <div className={style.infoContainer}>
+                <p className={classNames(style.bookInfo, Poppins.className)}>
+                  Already read
+                </p>
+                <p className={classNames(style.bookInfo, Poppins.className)}>
+                  {challenge?.book_read}
+                </p>
+              </div>
+              <div className={style.infoContainer}>
+                <p className={classNames(style.bookInfo, Poppins.className)}>
+                  Your goal
+                </p>
+                <p className={classNames(style.bookInfo, Poppins.className)}>
+                  {challenge?.book_want}
+                </p>
+              </div>{" "}
             </div>
-            <div className={style.infoContainer}>
-         
-              <p className={classNames(style.bookInfo, Poppins.className)}>
-                Your goal
-              </p>
-              <p className={classNames(style.bookInfo, Poppins.className)}>
-                {challenge?.book_want}
-              </p>
-            </div> </div>
             <button
               className={classNames(
                 style.challengeSendButton,
@@ -120,6 +129,6 @@ export default function Challenge() {
           </div>
         </div>
       </div>
-    </PageWrapper> 
-  ); 
+    </PageWrapper>
+  );
 }

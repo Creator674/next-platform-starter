@@ -15,18 +15,18 @@ import { useRouter } from "next/navigation";
 
 export default function Collections() {
   const [collections, setCollections] = useState<ICollection[]>([]);
+
+  const [currentUserId, setCurrentUserId] = useState<string | 1>(API_USER_ID);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const item = window ? window.localStorage.getItem("user_id") : null;
+      setCurrentUserId(item ? item : API_USER_ID);
+    }
+  }, []);
+
   const router = useRouter();
+
   useAuthCheck(router);
-
-  const [currentUserId, setCurrentUserId] = useState<string | number>(
-    API_USER_ID
-  );
-
-  if (typeof window !== "undefined") {
-    const item = window.localStorage.getItem("user_id");
-    const currentUserId: string | 1 = item ? item : API_USER_ID;
-    setCurrentUserId(currentUserId);
-  }
 
   const loadCollectionsData = useCallback(async () => {
     //change USER id to user RN

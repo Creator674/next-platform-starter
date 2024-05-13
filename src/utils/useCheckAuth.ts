@@ -15,5 +15,5 @@ export const useAuthCheck = (currentRouter: AppRouterInstance) => {
     } else {
       toast.error("Auth error!");
     }
-  }, [currentRouter]);
+  }, []);
 };

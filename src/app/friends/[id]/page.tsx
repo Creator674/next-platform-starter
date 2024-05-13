@@ -34,19 +34,17 @@ export default function CollectionPage() {
   const [collections, setCollections] = useState<ICollection[]>([]);
   const [books, setBooks] = useState<IBook[]>([]);
   const params = useParams<{ id: string }>();
-
   const router = useRouter();
+
+  const [currentUserId, setCurrentUserId] = useState<string | 1>(API_USER_ID);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const item = window ? window.localStorage.getItem("user_id") : null;
+      setCurrentUserId(item ? item : API_USER_ID);
+    }
+  }, []);
+
   useAuthCheck(router);
-
-  const [currentUserId, setCurrentUserId] = useState<string | number>(
-    API_USER_ID
-  );
-
-  if (typeof window !== "undefined") {
-    const item = window.localStorage.getItem("user_id");
-    const currentUserId: string | 1 = item ? item : API_USER_ID;
-    setCurrentUserId(currentUserId);
-  }
 
   const loadUserData = useCallback(async () => {
     const userResponse = await fetch(`${API_URL}/user`, {

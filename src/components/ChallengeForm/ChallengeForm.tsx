@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import style from "./ChallengeForm.module.css";
 //import { ChallengeForm } from "../ChallengeForm";
 import classNames from "classnames";
@@ -38,15 +38,13 @@ export const ChallengeForm: React.FC<ChallengeFormProps> = ({ onSuccess }) => {
   });
   const [amount, setAmount] = useState("");
 
-  const [currentUserId, setCurrentUserId] = useState<string | number>(
-    API_USER_ID
-  );
-
-  if (typeof window !== "undefined") {
-    const item = window.localStorage.getItem("user_id");
-    const currentUserId: string | 1 = item ? item : API_USER_ID;
-    setCurrentUserId(currentUserId);
-  }
+  const [currentUserId, setCurrentUserId] = useState<string | 1>(API_USER_ID);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const item = window ? window.localStorage.getItem("user_id") : null;
+      setCurrentUserId(item ? item : API_USER_ID);
+    }
+  }, []);
 
   const handleFormSubmit: SubmitHandler<ChallengeFormValues> = useCallback(
     async (state) => {

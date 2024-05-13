@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useCallback, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import style from "./FriendCard.module.css";
 import { IUser } from "@/types";
 import { Poppins } from "@/fonts";
@@ -28,16 +28,13 @@ export const FriendCard: FC<FriendCardProps> = ({
   const router = useRouter();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  const [currentUserId, setCurrentUserId] = useState<string | number>(
-    API_USER_ID
-  );
-
-  if (typeof window !== "undefined") {
-    const item = window.localStorage.getItem("user_id");
-    const currentUserId: string | 1 = item ? item : API_USER_ID;
-    setCurrentUserId(currentUserId);
-  }
+  const [currentUserId, setCurrentUserId] = useState<string | 1>(API_USER_ID);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const item = window ? window.localStorage.getItem("user_id") : null;
+      setCurrentUserId(item ? item : API_USER_ID);
+    }
+  }, []);
 
   const addFriendReq = useCallback(
     async (friend_id: number) => {
